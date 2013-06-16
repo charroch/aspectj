@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin:'application'
+
+mainClassName = 'HelloWorld'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+configurations {
+    aspectj
+}
+
+dependencies {
+    aspectj 'org.aspectj:aspectjtools:1.7.2'
+    compile 'org.aspectj:aspectjrt:1.7.2'
+}
+
+task hello << {
+    String greeting = 'hello from Ant'
+    ant.echo(message: greeting)
+}
+
+task aspect(dependsOn: assemble) << {
+    ant.taskdef( classpath: configurations.aspectj.asPath, resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties")
+    ant.iajc(sourceroots: 'src/main/java', classpath: configurations.compile.asPath, destDir: sourceSets.main.output.classesDir)
+}
+
+run.dependsOn aspect
